@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import prisma from "@/lib/prisma"; 
 type Sala = {
     id: String;
     hostName: string;
@@ -21,21 +22,29 @@ console.log(generar_codigo(6));
 
 export async function POST(request: Request) {
    try {
-        const body = await request.json();
-        const nuevaSala: Sala = {
-            id:generar_codigo(6),
-            hostName: body.hostname,
-        };
+        const res = await request.json();
 
-        salas.push(nuevaSala);
-        console.log(salas);
+ const nuevaSala = await prisma.sala.create({
+     data: {
+         id: generar_codigo(6),
+         hostName: res.hostName,
+     },
+ });
 
-        return NextResponse.json({
-            message: 'Sala creada',
-            sala: nuevaSala,
-        }, { status: 201 });
-    } catch (error) {
-        return NextResponse.json({ error: 'Error al procesar la solicitud' }, { status: 400 });
-    }
+ return NextResponse.json(
+     {
+         message: "Sala creada correctamente",
+         sala: nuevaSala,
+     },
+     { status: 201 }
+ );
+} catch (error) {
+ console.error("Error creando sala:", error);
+ return NextResponse.json(
+     { error: "Error al crear la sala" },
+     { status: 500 }
+ );
 }
+}
+
 
