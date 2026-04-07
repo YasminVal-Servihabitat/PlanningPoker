@@ -4,6 +4,7 @@ import { useState } from "react";
 
 export default function createRoom() {
   const [nombre, setNombre] = useState("");
+  const [codigoSala, setCodigoSala] = useState("");
   const [cargando, setCargando] = useState(false);
   const router = useRouter();
 
@@ -11,15 +12,35 @@ export default function createRoom() {
     e.preventDefault();
     setCargando(true);
 
-    if (nombre.trim()) {
-      const response = await fetch("/api/rooms/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hostName: nombre.trim() }),
-      });
-      const res = await response.json();
-      sessionStorage.setItem("participante", JSON.stringify({ id: res.participantId, username: nombre.trim() }));
-      router.push(`/room/${res.sala.codigo}`);
+    if (nombre.trim() && codigoSala.trim()) {
+      try {
+        const response = await fetch("/api/rooms/join", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nombre_participante: nombre.trim(),
+            salaId: codigoSala.trim(),
+          }),
+        });
+        const res = await response.json();
+
+        if (!response.ok || !res.sala) {
+          alert(res.error ?? "Error al unirse a la sala");
+          setCargando(false);
+          return;
+        }
+        sessionStorage.setItem(
+          "participante",
+          JSON.stringify({ id: res.participantId, username: nombre.trim() })
+        );
+
+        router.push(`/room/${res.sala.codigo}`);
+        console.log(sessionStorage);
+        console.log(res);
+      } catch {
+        alert("Error de conexión");
+        setCargando(false);
+      }
     }
   }
   return (
@@ -35,7 +56,7 @@ export default function createRoom() {
         </h1>
         <div className="relative flex-col p-10 rounded-3xl h-96 border-2 items-center bg-white/90 backdrop-blur-md shadow-xl border-red-500 text-center">
           <p className="text-2xl text-gray-700 mb-8 tracking-wide">
-            Introduce tu nombre para unirte a la sesión
+            Introduce el codigo de la sala para unirte.
           </p>
 
           <form onSubmit={enviar} className="w-full">
@@ -48,6 +69,16 @@ export default function createRoom() {
               required
               disabled={cargando}
               onChange={(e) => setNombre(e.target.value)}
+            />
+            <input
+              placeholder="Codigo..."
+              className="focus:outline-none focus:ring-4 focus:ring-red-500 w-full px-6 py-4 rounded-xl text-xl text-center text-black placeholder:text-gray-400 bg-white border border-red-500 shadow-sm mb-6 tracking-wide"
+              type="text"
+              id="codigoSala"
+              value={codigoSala}
+              required
+              disabled={cargando}
+              onChange={(e) => setCodigoSala(e.target.value)}
             />
 
             <button
