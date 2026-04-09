@@ -13,24 +13,9 @@ datasource db {
 }
 
 
-
 model Sala {
-  id            Int            @id @default(autoincrement())
-  codigo        String          @unique
-  host_Id      Int?
-  createdAt     DateTime       @default(now())
-
-  participants  participants[]
+  id       String     @id 
+  hostName     String
+  createdAt DateTime @default(now())
 }
-
-model participants {
-  id            Int       @id @default(autoincrement()) @unique
-  sala_id       Int
-  username      String
-  joined_at     DateTime  @default(now())
-  selected_card String?
-
-  sala          Sala      @relation(fields: [sala_id], references: [id], onDelete: Cascade)
-}
-
 

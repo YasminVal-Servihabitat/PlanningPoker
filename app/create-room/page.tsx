@@ -18,8 +18,8 @@ export default function createRoom() {
         body: JSON.stringify({ hostName: nombre.trim() }),
       });
       const res = await response.json();
-      sessionStorage.setItem("participante", JSON.stringify({ id: res.participantId, username: nombre.trim() }));
-      router.push(`/room/${res.sala.codigo}`);
+      router.push(`/room/${res.sala.id}`);
+      console.log(res);
     }
   }
   return (
